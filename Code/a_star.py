@@ -252,10 +252,10 @@ def getMap_rigid(World):
 def startPoint():
     sx = int(input('Enter x coordinate for start point: '))
     sy = int(input('Enter y coordinate for start point: '))
-    s_theta = np.deg2rad(float(input('Enter angle of start point in degrees: ')))
+    # s_theta = np.deg2rad(float(input('Enter angle of start point in degrees: ')))
     # sx = 5
     # sy = 5
-    return sx, sy, s_theta
+    return sx, sy
 
 
 # function to get goal points
@@ -273,8 +273,14 @@ def getCostOfMove(cur, i, j):
     return math.sqrt((x - i) ** 2 + (y - j) ** 2)   # Euclidean Distance formula
 
 
+# function to get cost of every move
+def getCosttoGoal(goal, i, j):
+    x, y = goal
+    return math.sqrt((x - i) ** 2 + (y - j) ** 2)   # Euclidean Distance formula
+
+
 # function to explore neighbors and lot more
-def explorer(costs, c_pq):
+def explorer(costs, c_pq, goal):
     while not c_pq.empty():
         top = c_pq.get()
         explored.append(top[1])
@@ -283,9 +289,9 @@ def explorer(costs, c_pq):
             break
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
-                if 0 <= i < 200 and 0 <= j < 300:
+                if 0 <= i < 200 and 0 <= j < 300:   # to ignore out of bounds error for borders
                     if w[i, j] == 1 and top[1] != (i, j):
-                        temp_cost = costs[top[1]] + getCostOfMove(top[1], i, j)
+                        temp_cost = costs[top[1]] + getCostOfMove(top[1], i, j) + getCosttoGoal(goal, i, j)
                         if temp_cost < costs[i, j]:
                             c_pq.put((temp_cost, (i, j)))
                             x1 = int(top[1][0])
@@ -318,10 +324,10 @@ if __name__ == '__main__':
     c = int(input('Enter clearance: '))
 
     # get step-size
-    step = int(input('Enter step size of movement in units ( 1 <= d <= 10): '))
+    # step = int(input('Enter step size of movement in units ( 1 <= d <= 10): '))
 
     # theta value
-    theta = np.deg2rad(float(input('Enter theta in degrees: ')))
+    # theta = np.deg2rad(float(input('Enter theta in degrees: ')))
 
     # threshold
     thresh = r + c
@@ -363,7 +369,7 @@ if __name__ == '__main__':
 
     # let's explore
     explored = []
-    explorer(cost, cost_pq)
+    explorer(cost, cost_pq, goal_point)
 
     # get final path
     path.append(goal_point)
