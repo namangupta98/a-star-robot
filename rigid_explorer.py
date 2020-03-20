@@ -1,10 +1,10 @@
-# Import standard libraries
+# Import necessary standard libraries
 import ast
 from sys import argv
 from time import time
 from bisect import insort_left
 from cv2 import imshow, waitKey, circle, arrowedLine, line
-# Import custom-built classes
+# Import necessary custom-built classes
 from utils.constants import scaling_factor, goal_thresh
 from utils.obstacle_space import Map
 from utils.explorer import Explorer
