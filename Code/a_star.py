@@ -250,8 +250,8 @@ def getMap_rigid(World):
 
 # function to get start points
 def startPoint():
-    sx = int(input('Enter x coordinate for start point: '))
-    sy = int(input('Enter y coordinate for start point: '))
+    sy = int(input('Enter x coordinate for start point: '))
+    sx = int(input('Enter y coordinate for start point: '))
     # s_theta = np.deg2rad(float(input('Enter angle of start point in degrees: ')))
     # sx = 5
     # sy = 5
@@ -260,8 +260,8 @@ def startPoint():
 
 # function to get goal points
 def goalPoint():
-    gx = int(input('Enter x coordinate for goal point: '))
-    gy = int(input('Enter y coordinate for goal point: '))
+    gy = int(input('Enter x coordinate for goal point: '))
+    gx = int(input('Enter y coordinate for goal point: '))
     # gx = 195
     # gy = 295
     return gx, gy
@@ -270,13 +270,13 @@ def goalPoint():
 # function to get cost of every move
 def getCostOfMove(cur, i, j):
     x, y = cur
-    return math.sqrt((x - i) ** 2 + (y - j) ** 2)   # Euclidean Distance formula
+    return math.sqrt(((x - i) ** 2) + ((y - j) ** 2))   # Euclidean Distance formula
 
 
 # function to get cost of every move
 def getCosttoGoal(goal, i, j):
     x, y = goal
-    return math.sqrt((x - i) ** 2 + (y - j) ** 2)   # Euclidean Distance formula
+    return math.sqrt(((x - i) ** 2) + ((y - j) ** 2))   # Euclidean Distance formula
 
 
 # function to explore neighbors and lot more
@@ -290,14 +290,17 @@ def explorer(costs, c_pq, goal):
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if 0 <= i < 200 and 0 <= j < 300:   # to ignore out of bounds error for borders
-                    if w[i, j] == 1 and top[1] != (i, j):
-                        temp_cost = costs[top[1]] + getCostOfMove(top[1], i, j) + getCosttoGoal(goal, i, j)
+                    if w[i, j] == 1 and (i, j) != top[1]:
+                        # CM = getCostOfMove(top[1], i, j)
+                        # CG = getCosttoGoal(goal, i, j)
+                        temp_parent_cost = costs[top[1]] + getCostOfMove(top[1], i, j)
+                        temp_cost = temp_parent_cost + getCosttoGoal(goal, i, j)
                         if temp_cost < costs[i, j]:
                             c_pq.put((temp_cost, (i, j)))
                             x1 = int(top[1][0])
                             y1 = int(top[1][1])
                             parent[i, j, :] = [x1, y1]
-                            costs[i][j] = temp_cost
+                            costs[i][j] = temp_parent_cost
 
 
 # function to backtrace the path
