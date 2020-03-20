@@ -2,7 +2,7 @@
 from math import sqrt
 from numpy import sin, cos, pi
 # Import necessary custom-methods
-from utils.constants import scaling_factor
+from utils.constants import scaling_factor, max_actions, half_actions
 
 
 def get_child(action_coords, map_limits):
@@ -54,7 +54,7 @@ class Node:
         # Define an empty dictionary to store child nodes
         child_nodes = []
         # Define all the possible no. of actions
-        max_actions = int(4 * (90 / theta))
+        # max_actions = int(4 * (90 / theta))
         # Perform each action on the current node to generate child node
         for i in range(max_actions):
             child_data = get_child(self.take_action(i, step_size, theta), map_limits)
@@ -84,6 +84,10 @@ class Node:
         :return: new coordinates of the node after the desired action
         """
         # Convert unit of angle from degrees to radians
-        theta = action * pi * (step_theta / 180)
+        if action <= half_actions:
+            theta = action * pi * (step_theta / 180)
+        else:
+            theta = (2 * pi) - ((action - half_actions) * pi * (step_theta / 180))
+
         return (self.data[0] + int(scaling_factor * step_size * cos(theta)),
                 self.data[1] + int(scaling_factor * step_size * sin(theta)))
