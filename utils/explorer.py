@@ -5,10 +5,9 @@ class Explorer:
     def __init__(self, start_node, goal_node):
         """
         Initialize the explorer with a start node and final goal node
-        :param start_node: a tuple of starting x-y coordinates provided by the user
-        :param goal_node: a tuple of goal coordinates provided by the user
+        :param start_node: a tuple of start coordinates and orientation provided by the user
+        :param goal_node: a tuple of goal coordinates and orientation provided by the user
         """
-
         # Store puzzle and goal nodes as class# Check whether the node is within the square members
         self.start_node = start_node
         self.goal_node = goal_node
@@ -20,10 +19,11 @@ class Explorer:
     def get_heuristic_score(self, node):
         """
         Implement heuristic function for a-star by calculating euclidean distance
+        Heuristic is nothing but cost to goal
         :param: node: tuple containing coordinates of the current node
         :return: distance between the goal node and current node
         """
-
+        # Evaluate euclidean distance between goal node and current node and return it
         return sqrt((self.goal_node[0] - node[0])**2 + (self.goal_node[1] - node[1])**2)
 
     def get_final_weight(self, node, node_cost):
@@ -33,15 +33,14 @@ class Explorer:
         :param node_cost: cost of each node
         :return: final weight for according to method
         """
-
+        # Add cost-to-goal and cost-to-come to get final cost and return it
         return self.get_heuristic_score(node) + node_cost
 
     def generate_path(self):
         """
         Generate path using backtracking
-        :return: nothing
+        :return: a list of all path nodes
         """
-
         # Define empty list to store path nodes
         # This list will be used to generate the node-path text file
         path_list = []
