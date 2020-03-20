@@ -1,17 +1,29 @@
+# Import necessary standard libraries
 import cv2
 import numpy as np
-from utils.constants import scaling_factor, width, height, goal_thresh
+# Import necessary constants
+from utils.constants import scaling_factor, width, height
 
 
 def get_slopes(points):
+    """
+    Get slope of each edge of the polygon
+    Polygon can have either have 4 or 6 edges
+    :param points: coordinates of the polygon
+    :return: a list of slopes of the edges of the polygon
+    """
+    # Get no. of points
     points_length = len(points)
     i = 0
+    # Define an empty list to store slopes of all edges
     slopes = []
     while i < points_length:
+        # Get indices of the two points of the edge
         if i != points_length - 1:
             j = i + 1
         else:
             j = 0
+        # Calculate slope and append it to the list
         slopes.append((points[j][1] - points[i][1]) / (points[j][0] - points[i][0]))
         i += 1
 
@@ -20,6 +32,11 @@ def get_slopes(points):
 
 class Map:
     def __init__(self, radius, clearance):
+        """
+        Initialize map class with radius of the robot and clearance
+        :param radius: radius of the robot in integers
+        :param clearance: minimum distance between the robot and the obstacle in integers
+        """
         # Various class parameters
         deg_30 = np.pi / 6
         deg_60 = np.pi / 3
@@ -62,38 +79,69 @@ class Map:
         self.length_quad = len(self.coord_rectangle)
 
     def get_y_values(self, x, slopes, coordinates, edge_count):
+        """
+        Calculate the y value of the current x from each edge
+        :param x: x-coordinate of the current node
+        :param slopes:a list of slopes of all edges of the polygon
+        :param coordinates: a list of vertices of the polygon
+        :param edge_count: no. of edges in the polygon
+        :return: a list of all y-values
+        """
+        # Define an empty list to store all y-values
         dist = []
         for i in range(edge_count):
+            # Add or subtract threshold based on the index of edge
             if i < (edge_count / 2):
                 dist.append(slopes[i] * (x - coordinates[i][0]) + coordinates[i][1] - self.thresh)
             else:
                 dist.append(slopes[i] * (x - coordinates[i][0]) + coordinates[i][1] + self.thresh)
-
+        # Return the list of y-values
         return dist
 
     def check_circle(self, x, y):
+        """
+        Method to check whether point lies within the circle
+        :param x: x-coordinate of the current node
+        :param y: y-coordinate of the current node
+        :return: true if point lies within the circle
+        """
+        # Define center of the circle
         a = self.circle[1][0]
         b = self.circle[1][1]
+        # Define radius of the circle
         r = self.circle[0] + self.thresh
-
+        # Check using the equation of the circle
         if (x - a) ** 2 + (y - b) ** 2 <= r ** 2:
             return True
 
         return False
 
     def check_ellipse(self, x, y):
+        """
+        Method to check whether point lies within the ellipse
+        :param x: x-coordinate of the current node
+        :param y: y-coordinate of the current node
+        :return: true if point lies within the ellipse
+        """
+        # Define axes length of the ellipse
         a = self.ellipse[0][0] + self.thresh
         b = self.ellipse[0][1] + self.thresh
-
+        # Define center of the ellipse
         center_a = self.ellipse[1][0]
         center_b = self.ellipse[1][1]
-
+        # Check using the equation of the ellipse
         if ((x - center_a) / a) ** 2 + ((y - center_b) / b) ** 2 <= 1:
             return True
 
         return False
 
     def check_polygons(self, x, y):
+        """
+        Method to check whether point lies within the convex polygon or the quadrilaterals
+        :param x: x-coordinate of the current node
+        :param y: y-coordinate of the current node
+        :return: true if point lies within the convex polygon or the quadrilaterals
+        """
         # Get y values for each edge of the convex polygon
         y_poly = self.get_y_values(x, self.slopes_poly, self.coord_polygon, 6)
         last_poly_slope = ((self.coord_polygon[2][1] - self.coord_polygon[5][1]) /
@@ -118,14 +166,26 @@ class Map:
         return False
 
     def check_node_validity(self, x, y):
+        """
+        Method to check whether point lies within any obstacle
+        :param x: x-coordinate of the current node
+        :param y: y-coordinate of the current node
+        :return: false if point lies within any obstacle
+        """
+        # Check whether the current node lies within the map
         if x >= self.width or y >= self.height:
             return False
+        # Check whether the current node lies within any obstacle
         elif self.check_polygons(x, y) or self.check_circle(x, y) or self.check_ellipse(x, y):
             return False
 
         return True
 
     def get_map(self):
+        """
+        Draw map using various opencv methods
+        :return: image with all obstacles
+        """
         # Create empty image and fill it with white background
         img = np.zeros((scaling_factor * height, scaling_factor * width, 3), dtype=np.uint8)
         img.fill(255)
