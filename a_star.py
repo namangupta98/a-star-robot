@@ -84,8 +84,8 @@ def getMap(World):
 
     # Get obstacles for world
     obstacle(lines, 200, 250, 10, 40, World)
-    circle_obstacle(150, 100, 40, 20, 1, World)
-    circle_obstacle(225, 150, 1, 1, 25, World)
+    circle_obstacle(th*150, th*100, 40, 20, th*1, World)
+    circle_obstacle(th*225, th*150, 1, 1, th*25, World)
 
     points = [[25, 185, 50, 185, 0],
               [50, 185, 50, 150, 0],
@@ -186,8 +186,8 @@ def getMap_rigid(World):
     # Get obstacles for world
     obstacle(lines, max(200 - 3 * thresh, 0), min(250 + 3 * thresh, 299), max(10 - 3 * thresh, 0),
              min(40 + 3 * thresh, 199), World)
-    circle_obstacle(150, 100, 40 + thresh, 20 + thresh, 1, World)
-    circle_obstacle(225, 150, 1, 1, 25 + thresh, World)
+    circle_obstacle(th*150, th*100, (40 + thresh), (20 + thresh), th*1, World)
+    circle_obstacle(th*225, th*150, 1, 1, th*(25 + thresh), World)
 
     points = [[25, 185, 50, 185, 0],
               [50, 185, 50, 150, 0],
@@ -250,20 +250,20 @@ def getMap_rigid(World):
 
 # function to get start points
 def startPoint():
-    sy = int(input('Enter x coordinate for start point: '))
-    sx = int(input('Enter y coordinate for start point: '))
+    # sy = th*int(input('Enter x coordinate for start point: '))
+    # sx = th*int(input('Enter y coordinate for start point: '))
     # s_theta = np.deg2rad(float(input('Enter angle of start point in degrees: ')))
-    # sx = 5
-    # sy = 5
+    sx = th*30
+    sy = th*50
     return sx, sy
 
 
 # function to get goal points
 def goalPoint():
-    gy = int(input('Enter x coordinate for goal point: '))
-    gx = int(input('Enter y coordinate for goal point: '))
-    # gx = 195
-    # gy = 295
+    # gx = th*int(input('Enter x coordinate for goal point: '))
+    # gy = th*int(input('Enter y coordinate for goal point: '))
+    gx = th*150
+    gy = th*150
     return gx, gy
 
 
@@ -289,7 +289,7 @@ def explorer(costs, c_pq, goal):
             break
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
-                if 0 <= i < 200 and 0 <= j < 300:   # to ignore out of bounds error for borders
+                if 0 <= i < w.shape[0] and 0 <= j < w.shape[1]:   # to avoid robot going out of bounds
                     if w[i, j] == 1 and (i, j) != top[1]:
                         # CM = getCostOfMove(top[1], i, j)
                         # CG = getCosttoGoal(goal, i, j)
@@ -315,6 +315,9 @@ def backtrace(x, y):
 # main function
 if __name__ == '__main__':
 
+    # threshold scaling factor
+    th = int(1/0.5)
+
     # Get points
     path = []
     start_point = startPoint()
@@ -333,14 +336,14 @@ if __name__ == '__main__':
     # theta = np.deg2rad(float(input('Enter theta in degrees: ')))
 
     # threshold
-    thresh = r + c
+    thresh = (r + c) * th
 
     # generate rigid world with obstacles
-    w = world(200, 300)
+    w = world(200*th, 300*th)
     getMap_rigid(w)
 
     # original world
-    old_w = world(200, 300)
+    old_w = world(200*th, 300*th)
     getMap(old_w)
 
     # check goal_point lies on obstacle
@@ -358,7 +361,7 @@ if __name__ == '__main__':
 
     # Arrays for cost, parent
     cost_pq = PriorityQueue()
-    parent = np.zeros((200, 300, 2))
+    parent = np.zeros((w.shape[0], w.shape[1], 2))
     cost = np.empty_like(w)
 
     # create empty parent and cost array
@@ -400,7 +403,9 @@ if __name__ == '__main__':
         # cv2.circle(rgb_w, (int(exp[1]), int(exp[0])), 1, (0, 255, 0))
         rgb_w[m - int(exp[0]) - 1, int(exp[1]), :] = [0, 255, 0]
         cv2.imshow("Explored region", rgb_w)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xff == ord('q'):
+            cv2.destroyAllWindows()
+            break
         if count == len(explored):
             cv2.destroyAllWindows()
 
