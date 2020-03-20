@@ -3,7 +3,7 @@ import ast
 from sys import argv
 from time import time
 from bisect import insort_left
-from cv2 import imshow, waitKey, circle
+from cv2 import imshow, waitKey, circle, arrowedLine, line
 # Import custom-built classes
 from utils.constants import scaling_factor, goal_thresh
 from utils.obstacle_space import Map
@@ -60,27 +60,36 @@ if __name__ == '__main__':
                 # Append child node to the list of open nodes
                 # Do no append child node if repeated
                 if not node_repeated:
+                    # Maintain a sorted array
                     insort_left(explorer.open_nodes, child_node)
-                    # explorer.open_nodes.append(child_node)
+                    # Append latest child node to list that contains all generated nodes
                     explorer.generated_nodes.append(child_node)
-            # Sort the open nodes using their weights
-            # explorer.open_nodes.sort(key=lambda x: x.weight, reverse=False)
 
     # Generate path
     path_data = explorer.generate_path()
     print('Exploration Time:', time() - start_time)
     start_time = time()
-    map_img = obstacle_map.get_map(start_node_coords, goal_node_coords)
+    # Get map to show various obstacles
+    map_img = obstacle_map.get_map()
     blue = [255, 0, 0]
-    white = [255, 255, 255]
+    red = [0, 0, 255]
+    skip_one = 0
     # Show all generated nodes
     for node in explorer.generated_nodes:
-        map_img[obstacle_map.height - node.data[1], node.data[0]] = white
+        if not skip_one:
+            skip_one += 1
+            continue
+        arrowedLine(map_img, (node.parent[0], obstacle_map.height - node.parent[1]),
+                    (node.data[0], obstacle_map.height - node.data[1]), blue)
         imshow("Node Exploration", map_img)
         waitKey(1)
-    # Show path
-    for data in path_data:
-        circle(map_img, (data[0], obstacle_map.height - data[1]), 1, blue, -1)
+    # Draw goal node on the map
+    circle(map_img, (goal_node_coords[0], obstacle_map.height - goal_node_coords[1]), goal_thresh, [0, 255, 0], -1)
+    # Show generated path
+    for i in range(1, len(path_data)):
+        line(map_img, (path_data[i - 1][0], obstacle_map.height - path_data[i - 1][1]),
+             (path_data[i][0], obstacle_map.height - path_data[i][1]), red)
+        circle(map_img, (path_data[i][0], obstacle_map.height - path_data[i][1]), goal_thresh, red, -1)
         imshow("Node Exploration", map_img)
     print('Animation Time:', time() - start_time)
     waitKey(15000)
