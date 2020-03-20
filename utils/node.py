@@ -1,7 +1,7 @@
 # Import necessary standard libraries
 from math import sqrt
 from numpy import sin, cos, pi
-# Import necessary custom-methods
+# Import necessary constants
 from utils.constants import scaling_factor, max_actions, half_actions
 
 
@@ -23,10 +23,10 @@ class Node:
     def __init__(self, node_coordinates, node_weight, node_cost, parent_node):
         """
         Initialize node class with start node and weight of the start node
-        :param node_coordinates: a tuple containing x,y coordinates of the node
+        :param node_coordinates: a tuple containing x,y coordinates and theta orientation of the node
         :param node_weight: final weight of the node
         :param node_cost: cost of the node
-        :param parent_node: store coordinates of the parent node
+        :param parent_node: store coordinates and orientation of the parent node
         """
         # Define parameters that are common across the class
         self.data = node_coordinates
@@ -53,8 +53,6 @@ class Node:
         """
         # Define an empty dictionary to store child nodes
         child_nodes = []
-        # Define all the possible no. of actions
-        # max_actions = int(4 * (90 / theta))
         # Perform each action on the current node to generate child node
         for i in range(max_actions):
             child_data = get_child(self.take_action(i, step_size, theta), map_limits)
@@ -85,9 +83,10 @@ class Node:
         """
         # Convert unit of angle from degrees to radians
         if action <= half_actions:
-            theta = action * pi * (step_theta / 180)
+            theta = self.data[2] + (action * step_theta)
         else:
-            theta = (2 * pi) - ((action - half_actions) * pi * (step_theta / 180))
-
-        return (self.data[0] + int(scaling_factor * step_size * cos(theta)),
-                self.data[1] + int(scaling_factor * step_size * sin(theta)))
+            theta = self.data[2] - ((action - half_actions) * step_theta)
+        # Return the coordinates and orientation of the child node
+        return (self.data[0] + int(scaling_factor * step_size * cos(pi * theta / 180)),
+                self.data[1] + int(scaling_factor * step_size * sin(pi * theta / 180)),
+                theta)
