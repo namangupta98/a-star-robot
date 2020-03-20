@@ -125,10 +125,10 @@ class Map:
 
         return True
 
-    def get_map(self, start_node, goal_node):
+    def get_map(self):
         # Create empty image and fill it with white background
         img = np.zeros((scaling_factor * height, scaling_factor * width, 3), dtype=np.uint8)
-        img.fill(200)
+        img.fill(255)
         # Define color as a tuple in BGR format for obstacles
         color = (0, 0, 0)
         # Draw obstacles in black color
@@ -137,9 +137,5 @@ class Map:
         cv2.fillConvexPoly(img, self.coord_rhombus, color)
         cv2.circle(img, self.circle[1], self.circle[0], color, -1)
         cv2.ellipse(img, self.ellipse[1], (self.ellipse[0][0], self.ellipse[0][1]), 0, 0, 360, color, -1)
-        # Draw start and goal points in green and red respectively
-        cv2.circle(img, (start_node[0], self.height - start_node[1]), goal_thresh, [0, 0, 255], -1)
-        cv2.circle(img, (goal_node[0], self.height - goal_node[1]), goal_thresh, [0, 255, 0], -1)
-        # cv2.circle(img, goal_node, goal_thresh, [0, 0, 255])
 
         return img
