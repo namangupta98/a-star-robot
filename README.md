@@ -44,7 +44,7 @@ cd a-star-robot
 ```
 If you have a compressed version of the project, extract it, go into project directory, open the terminal, and type:
 ```
-python3 rigid_explorer.py start_x,start_y goal_x,goal_y method
-python3 rigid_explorer.py 5,5 200,100 a
+python3 rigid_explorer.py start_x,start_y goal_x,goal_y radius,clearance step_size theta
+python3 rigid_explorer.py 5,5 200,100 1,1 1 30
 ```
 
