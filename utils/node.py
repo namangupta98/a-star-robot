@@ -1,5 +1,8 @@
-from utils import actions
+# Import necessary standard libraries
 from math import sqrt
+from numpy import sin, cos, pi
+# Import necessary custom-methods
+from utils.constants import scaling_factor
 
 
 def get_child(action_coords, map_limits):
@@ -54,7 +57,7 @@ class Node:
         max_actions = int(4 * (90 / theta))
         # Perform each action on the current node to generate child node
         for i in range(max_actions):
-            child_data = get_child(actions.take_action(i, self.data, step_size, theta), map_limits)
+            child_data = get_child(self.take_action(i, step_size, theta), map_limits)
             # Check if child node is generated
             if child_data is not None:
                 # Define all the properties of the child node and append to the child nodes' list
@@ -71,3 +74,16 @@ class Node:
         """
         # Self-data contains coordinates of the parent node as a tuple
         return self.cost + sqrt((child_coords[0] - self.data[0]) ** 2 + (child_coords[1] - self.data[1]) ** 2)
+
+    def take_action(self, action, step_size, step_theta):
+        """
+        Call various actions based on an integer
+        :param action: Varies from 0-n to call one of the 8 defined actions
+        :param step_theta: angular step between each action
+        :param step_size: No. of units by which the robot should move
+        :return: new coordinates of the node after the desired action
+        """
+        # Convert unit of angle from degrees to radians
+        theta = action * pi * (step_theta / 180)
+        return (self.data[0] + int(scaling_factor * step_size * cos(theta)),
+                self.data[1] + int(scaling_factor * step_size * sin(theta)))
