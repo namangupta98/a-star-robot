@@ -99,10 +99,8 @@ if __name__ == '__main__':
         # Draw arrows from the parent node to the child nodes
         cv2.arrowedLine(map_img, (node.parent[0], obstacle_map.height - node.parent[1]),
                         (node.data[0], obstacle_map.height - node.data[1]), blue)
+        # Add frame to video
         video_output.write(map_img)
-        # Show on the map
-        # cv2.imshow("Node Exploration", map_img)
-        # cv2.waitKey(1)
     # Draw goal node on the map
     cv2.circle(map_img, (goal_node_data[0], obstacle_map.height - goal_node_data[1]), goal_thresh, [0, 255, 0], -1)
     # Show generated path
@@ -112,11 +110,8 @@ if __name__ == '__main__':
              (path_data[i][0], obstacle_map.height - path_data[i][1]), red)
         # Highlight each path node
         cv2.circle(map_img, (path_data[i][0], obstacle_map.height - path_data[i][1]), goal_thresh, red, -1)
+        # Add frame to video
         video_output.write(map_img)
-        # Show on the map
-        # cv2.imshow("Node Exploration", map_img)
     print('Animation Time:', time() - start_time)
-    # Wait for 15 seconds before destroying image window
-    cv2.waitKey(15000)
     video_output.release()
     cv2.destroyAllWindows()
