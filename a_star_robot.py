@@ -3,7 +3,7 @@ import ast
 from sys import argv
 from time import time
 from bisect import insort_left
-from cv2 import imshow, waitKey, circle, arrowedLine, line
+import cv2
 # Import necessary custom-built classes
 from utils.constants import scaling_factor, goal_thresh
 from utils.obstacle_space import Map
@@ -21,11 +21,13 @@ Add various parameters as input arguments from user
 script, start_node_data, goal_node_data, robot_params, step_size, theta = argv
 
 if __name__ == '__main__':
+    video_format = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
+    video_output = cv2.VideoWriter('video_simulation.avi', video_format, 120.0, (600, 400))
     start_time = time()
     # Convert input arguments into their required data types
     start_node_data = tuple(ast.literal_eval(start_node_data))
     start_node_data = (scaling_factor * start_node_data[0], scaling_factor * start_node_data[1],
-                         start_node_data[2])
+                       start_node_data[2])
     goal_node_data = tuple(ast.literal_eval(goal_node_data))
     goal_node_data = (scaling_factor * goal_node_data[0], scaling_factor * goal_node_data[1], goal_node_data[2])
     robot_params = tuple(ast.literal_eval(robot_params))
@@ -95,22 +97,26 @@ if __name__ == '__main__':
             skip_one += 1
             continue
         # Draw arrows from the parent node to the child nodes
-        arrowedLine(map_img, (node.parent[0], obstacle_map.height - node.parent[1]),
-                    (node.data[0], obstacle_map.height - node.data[1]), blue)
+        cv2.arrowedLine(map_img, (node.parent[0], obstacle_map.height - node.parent[1]),
+                        (node.data[0], obstacle_map.height - node.data[1]), blue)
+        video_output.write(map_img)
         # Show on the map
-        imshow("Node Exploration", map_img)
-        waitKey(1)
+        # cv2.imshow("Node Exploration", map_img)
+        # cv2.waitKey(1)
     # Draw goal node on the map
-    circle(map_img, (goal_node_data[0], obstacle_map.height - goal_node_data[1]), goal_thresh, [0, 255, 0], -1)
+    cv2.circle(map_img, (goal_node_data[0], obstacle_map.height - goal_node_data[1]), goal_thresh, [0, 255, 0], -1)
     # Show generated path
     for i in range(1, len(path_data)):
         # Draw path
-        line(map_img, (path_data[i - 1][0], obstacle_map.height - path_data[i - 1][1]),
+        cv2.line(map_img, (path_data[i - 1][0], obstacle_map.height - path_data[i - 1][1]),
              (path_data[i][0], obstacle_map.height - path_data[i][1]), red)
         # Highlight each path node
-        circle(map_img, (path_data[i][0], obstacle_map.height - path_data[i][1]), goal_thresh, red, -1)
+        cv2.circle(map_img, (path_data[i][0], obstacle_map.height - path_data[i][1]), goal_thresh, red, -1)
+        video_output.write(map_img)
         # Show on the map
-        imshow("Node Exploration", map_img)
+        # cv2.imshow("Node Exploration", map_img)
     print('Animation Time:', time() - start_time)
     # Wait for 15 seconds before destroying image window
-    waitKey(15000)
+    cv2.waitKey(15000)
+    video_output.release()
+    cv2.destroyAllWindows()
