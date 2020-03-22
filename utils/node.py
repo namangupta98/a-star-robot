@@ -38,10 +38,10 @@ class Node:
         return self.weight == other.weight
 
     def __gt__(self, other):
-        return self.weight > other.weight
+        return not (self.weight > other.weight)
 
     def __lt__(self, other):
-        return self.weight < other.weight
+        return not (self.weight < other.weight)
 
     def generate_child_nodes(self, step_size, theta, map_limits):
         """
@@ -84,8 +84,12 @@ class Node:
         # Convert unit of angle from degrees to radians
         if action <= half_actions:
             theta = self.data[2] + (action * step_theta)
+            if theta >= 360:
+                theta = theta - 360
         else:
             theta = self.data[2] - ((action - half_actions) * step_theta)
+            if theta < 0:
+                theta = 360 + theta
         # Return the coordinates and orientation of the child node
         return (self.data[0] + int(scaling_factor * step_size * cos(pi * theta / 180)),
                 self.data[1] + int(scaling_factor * step_size * sin(pi * theta / 180)),
