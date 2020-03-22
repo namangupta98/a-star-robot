@@ -30,7 +30,7 @@ class Explorer:
         """
         Get final weight for a-star
         :param node: tuple containing coordinates of the current node
-        :param node_cost: cost of each node
+        :param node_cost: cost-to-come for the current node
         :return: final weight for according to method
         """
         # Add cost-to-goal and cost-to-come to get final cost and return it

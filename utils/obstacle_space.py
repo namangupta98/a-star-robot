@@ -74,9 +74,8 @@ class Map:
         self.circle = [scaling_factor * 25, (scaling_factor * 225, scaling_factor * 50)]
         self.ellipse = [(scaling_factor * 40, scaling_factor * 20),
                         (scaling_factor * 150, scaling_factor * (height - 100))]
-        # Define length of the convex polygon and the quadrilaterals
-        self.length_poly = len(self.coord_polygon)
-        self.length_quad = len(self.coord_rectangle)
+        # Get image to search for obstacles
+        self.check_img = self.erode_image()
 
     def get_y_values(self, x, slopes, coordinates, edge_count):
         """
@@ -176,10 +175,27 @@ class Map:
         if x >= self.width or y >= self.height:
             return False
         # Check whether the current node lies within any obstacle
-        elif self.check_polygons(x, y) or self.check_circle(x, y) or self.check_ellipse(x, y):
+        elif self.check_img[y, x].all() == 0:
             return False
+        # elif self.check_polygons(x, y) or self.check_circle(x, y) or self.check_ellipse(x, y):
+        #     return False
 
         return True
+
+    def erode_image(self):
+        """
+        Get eroded image to check for obstacles considering the robot radius and clearance
+        :return: image with obstacle space expanded to distance threshold between robot and obstacle
+        """
+        # Get map with obstacles
+        eroded_img = self.get_map()
+        # Erode map image for rigid robot
+        if self.thresh:
+            kernel_size = (self.thresh * 2) + 1
+            erode_kernel = np.ones((kernel_size, kernel_size), np.uint8)
+            eroded_img = cv2.erode(eroded_img, erode_kernel, iterations=1)
+
+        return eroded_img
 
     def get_map(self):
         """

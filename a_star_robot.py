@@ -2,7 +2,7 @@
 import ast
 from sys import argv
 from time import time
-from bisect import insort_left
+from bisect import insort_right
 import cv2
 # Import necessary custom-built classes
 from utils.constants import scaling_factor, goal_thresh
@@ -22,7 +22,7 @@ script, start_node_data, goal_node_data, robot_params, step_size, theta = argv
 
 if __name__ == '__main__':
     video_format = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
-    video_output = cv2.VideoWriter('video_simulation.avi', video_format, 120.0, (600, 400))
+    video_output = cv2.VideoWriter('video_simulation.avi', video_format, 600.0, (600, 400))
     start_time = time()
     # Convert input arguments into their required data types
     start_node_data = tuple(ast.literal_eval(start_node_data))
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     explorer.generated_nodes.append(start_node)
     while len(explorer.open_nodes):
         # Get and remove the node with lowest weight
-        current_node = explorer.open_nodes.pop(0)
+        current_node = explorer.open_nodes.pop()
         # Add it to the list of visited nodes
         explorer.closed_nodes.append(current_node)
         # Check if current node is the goal node
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 # Do no append child node if repeated
                 if not node_repeated:
                     # Maintain a sorted array
-                    insort_left(explorer.open_nodes, child_node)
+                    insort_right(explorer.open_nodes, child_node)
                     # Append latest child node to list that contains all generated nodes
                     explorer.generated_nodes.append(child_node)
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     for i in range(1, len(path_data)):
         # Draw path
         cv2.line(map_img, (path_data[i - 1][0], obstacle_map.height - path_data[i - 1][1]),
-             (path_data[i][0], obstacle_map.height - path_data[i][1]), red)
+                 (path_data[i][0], obstacle_map.height - path_data[i][1]), red)
         # Highlight each path node
         cv2.circle(map_img, (path_data[i][0], obstacle_map.height - path_data[i][1]), goal_thresh, red, -1)
         # Add frame to video
