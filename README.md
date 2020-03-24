@@ -1,4 +1,4 @@
-# A-Star Robot
+# A* Robot
 [![Build Status](https://travis-ci.org/namangupta98/a-star-robot.svg?branch=master)](https://travis-ci.org/namangupta98/a-star-robot)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/namangupta98/a-star-robot/blob/master/LICENSE)
 
@@ -69,7 +69,7 @@ python3 a_star_robot.py 50,30,60 150,150,0 1,1 1 30 1
 ```
 
 <p align="center">
-  <img src="https://github.com/namangupta98/a-star-robot/blob/master/images/final_path.png">
+  <img src="https://github.com/namangupta98/a-star-robot/blob/master/images/final_path.png" width="600" height="400">
   <br><b>Figure 1 - Final path using A* from start to goal</b><br>
 </p>
 
