@@ -1,4 +1,6 @@
 # A-Star Robot
+[![Build Status](https://travis-ci.org/urastogi885/path-finding-dijkstra.svg?branch=master)](https://travis-ci.org/urastogi885/a-star-robot)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/namangupta98/a-star-robot/blob/master/LICENSE)
 
 ## Authors
 - [Umang Rastogi](https://github.com/urastogi885/)
