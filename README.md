@@ -21,8 +21,7 @@ This project is an implementation of A* algorithm on a rigid non-holonomic robot
 ## For TAs
 
 - Further improvements have been made to the project after the submission for Project-3 Phase-2.
-- The exploration has been reduced to 10 seconds when using dijkstra from 2 hours for the start and goal node
-configuration: 50,30,60 and 150,150,0 respectively.
+- The exploration has been reduced to 10 seconds from 2 hours for the start and goal node configuration: 50,30,60 and 150,150,0 respectively.
 - You can access the submission version from the [*release section*](https://github.com/namangupta98/a-star-robot/releases)
 
 ## Dependencies
