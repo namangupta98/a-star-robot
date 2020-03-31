@@ -30,6 +30,23 @@ def get_slopes(points):
     return slopes
 
 
+def get_y_values(x, slopes, coordinates, edge_count):
+    """
+    Calculate the y value of the current x from each edge
+    :param x: x-coordinate of the current node
+    :param slopes:a list of slopes of all edges of the polygon
+    :param coordinates: a list of vertices of the polygon
+    :param edge_count: no. of edges in the polygon
+    :return: a list of all y-values
+    """
+    # Define an empty list to store all y-values
+    dist = []
+    for i in range(edge_count):
+        dist.append(slopes[i] * (x - coordinates[i][0]) + coordinates[i][1])
+    # Return the list of y-values
+    return dist
+
+
 class Map:
     def __init__(self, radius, clearance):
         """
@@ -74,95 +91,72 @@ class Map:
         self.circle = [scaling_factor * 25, (scaling_factor * 225, scaling_factor * 50)]
         self.ellipse = [(scaling_factor * 40, scaling_factor * 20),
                         (scaling_factor * 150, scaling_factor * (height - 100))]
+        # Define empty world
+        self.obstacle_map = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        self.obstacle_map = self.draw_obstacles()
         # Get image to search for obstacles
         self.check_img = self.erode_image()
 
-    def get_y_values(self, x, slopes, coordinates, edge_count):
+    def draw_circle(self):
         """
-        Calculate the y value of the current x from each edge
-        :param x: x-coordinate of the current node
-        :param slopes:a list of slopes of all edges of the polygon
-        :param coordinates: a list of vertices of the polygon
-        :param edge_count: no. of edges in the polygon
-        :return: a list of all y-values
-        """
-        # Define an empty list to store all y-values
-        dist = []
-        for i in range(edge_count):
-            # Add or subtract threshold based on the index of edge
-            if i < (edge_count / 2):
-                dist.append(slopes[i] * (x - coordinates[i][0]) + coordinates[i][1] - self.thresh)
-            else:
-                dist.append(slopes[i] * (x - coordinates[i][0]) + coordinates[i][1] + self.thresh)
-        # Return the list of y-values
-        return dist
-
-    def check_circle(self, x, y):
-        """
-        Method to check whether point lies within the circle
-        :param x: x-coordinate of the current node
-        :param y: y-coordinate of the current node
-        :return: true if point lies within the circle
+        Draw the circle obstacle on the map-image
+        :return: nothing
         """
         # Define center of the circle
         a = self.circle[1][0]
         b = self.circle[1][1]
         # Define radius of the circle
-        r = self.circle[0] + self.thresh
-        # Check using the equation of the circle
-        if (x - a) ** 2 + (y - b) ** 2 <= r ** 2:
-            return True
+        r = self.circle[0]
+        # Draw the circle
+        for y in range(self.height):
+            for x in range(self.width):
+                if (x - a) ** 2 + (y - b) ** 2 <= r ** 2:
+                    self.obstacle_map[y][x] = (0, 0, 0)
 
-        return False
-
-    def check_ellipse(self, x, y):
+    def draw_ellipse(self):
         """
-        Method to check whether point lies within the ellipse
-        :param x: x-coordinate of the current node
-        :param y: y-coordinate of the current node
-        :return: true if point lies within the ellipse
-        """
-        # Define axes length of the ellipse
-        a = self.ellipse[0][0] + self.thresh
-        b = self.ellipse[0][1] + self.thresh
-        # Define center of the ellipse
+                Draw the circle obstacle on the map-image
+                :return: nothing
+                """
+        # Get axes length of the ellipse
+        a = self.ellipse[0][0]
+        b = self.ellipse[0][1]
+        # Get center of the ellipse
         center_a = self.ellipse[1][0]
         center_b = self.ellipse[1][1]
-        # Check using the equation of the ellipse
-        if ((x - center_a) / a) ** 2 + ((y - center_b) / b) ** 2 <= 1:
-            return True
+        # Draw the ellipse
+        for y in range(self.height):
+            for x in range(self.width):
+                if ((x - center_a) / a) ** 2 + ((y - center_b) / b) ** 2 <= 1:
+                    self.obstacle_map[y][x] = (0, 0, 0)
 
-        return False
-
-    def check_polygons(self, x, y):
+    def draw_polygons(self):
         """
-        Method to check whether point lies within the convex polygon or the quadrilaterals
-        :param x: x-coordinate of the current node
-        :param y: y-coordinate of the current node
-        :return: true if point lies within the convex polygon or the quadrilaterals
+        Draw the convex polygon, rectangle and rhombus on the map-image
+        :return: nothing
         """
-        # Get y values for each edge of the convex polygon
-        y_poly = self.get_y_values(x, self.slopes_poly, self.coord_polygon, 6)
         last_poly_slope = ((self.coord_polygon[2][1] - self.coord_polygon[5][1]) /
                            (self.coord_polygon[2][0] - self.coord_polygon[5][0]))
-        y_poly.append(last_poly_slope * (x - self.coord_polygon[5][0]) + self.coord_polygon[5][1] + self.thresh)
-        # Get y values for each edge of the rectangle
-        y_rect = self.get_y_values(x, self.slopes_rect, self.coord_rectangle, 4)
-        # Get y values for each edge of the rhombus
-        y_rhom = self.get_y_values(x, self.slopes_rhom, self.coord_rhombus, 4)
-        # Return true if point lies within the convex polygon
-        if y_poly[0] <= y <= y_poly[6] and y_poly[1] <= y <= y_poly[5]:
-            return True
-        elif y_poly[2] <= y <= y_poly[4] and y_poly[6] <= y <= y_poly[3]:
-            return True
-        # Return true if point lies within the tilted rectangle
-        elif y_rect[0] <= y <= y_rect[2] and y_rect[1] <= y <= y_rect[3]:
-            return True
-        # Return true if point lies within the rhombus
-        elif y_rhom[0] <= y <= y_rhom[3] and y_rhom[1] <= y <= y_rhom[2]:
-            return True
-
-        return False
+        for y in range(self.height):
+            for x in range(self.width):
+                # Get y values for each edge of the convex polygon
+                y_poly = get_y_values(x, self.slopes_poly, self.coord_polygon, 6)
+                y_poly.append(last_poly_slope * (x - self.coord_polygon[5][0]) + self.coord_polygon[5][1])
+                # Get y values for each edge of the rectangle
+                y_rect = get_y_values(x, self.slopes_rect, self.coord_rectangle, 4)
+                # Get y values for each edge of the rhombus
+                y_rhom = get_y_values(x, self.slopes_rhom, self.coord_rhombus, 4)
+                # Draw the convex polygon
+                if y_poly[0] <= y <= y_poly[6] and y_poly[1] <= y <= y_poly[5]:
+                    self.obstacle_map[y][x] = (0, 0, 0)
+                elif y_poly[2] <= y <= y_poly[4] and y_poly[6] <= y <= y_poly[3]:
+                    self.obstacle_map[y][x] = (0, 0, 0)
+                # Draw the tilted rectangle
+                elif y_rect[0] <= y <= y_rect[2] and y_rect[1] <= y <= y_rect[3]:
+                    self.obstacle_map[y][x] = (0, 0, 0)
+                # Draw the rhombus
+                elif y_rhom[0] <= y <= y_rhom[3] and y_rhom[1] <= y <= y_rhom[2]:
+                    self.obstacle_map[y][x] = (0, 0, 0)
 
     def check_node_validity(self, x, y):
         """
@@ -177,8 +171,6 @@ class Map:
         # Check whether the current node lies within any obstacle
         elif self.check_img[y, x].all() == 0:
             return False
-        # elif self.check_polygons(x, y) or self.check_circle(x, y) or self.check_ellipse(x, y):
-        #     return False
 
         return True
 
@@ -188,7 +180,7 @@ class Map:
         :return: image with obstacle space expanded to distance threshold between robot and obstacle
         """
         # Get map with obstacles
-        eroded_img = self.get_map()
+        eroded_img = self.obstacle_map.copy()
         # Erode map image for rigid robot
         if self.thresh:
             kernel_size = (self.thresh * 2) + 1
@@ -197,21 +189,16 @@ class Map:
 
         return eroded_img
 
-    def get_map(self):
+    def draw_obstacles(self):
         """
-        Draw map using various opencv methods
-        :return: image with all obstacles
+        Draw map using half-plane equations
+        :return: map-image with all obstacles
         """
-        # Create empty image and fill it with white background
-        img = np.zeros((scaling_factor * height, scaling_factor * width, 3), dtype=np.uint8)
-        img.fill(255)
-        # Define color as a tuple in BGR format for obstacles
-        color = (0, 0, 0)
-        # Draw obstacles in black color
-        cv2.fillPoly(img, [self.coord_polygon], color)
-        cv2.fillConvexPoly(img, self.coord_rectangle, color)
-        cv2.fillConvexPoly(img, self.coord_rhombus, color)
-        cv2.circle(img, self.circle[1], self.circle[0], color, -1)
-        cv2.ellipse(img, self.ellipse[1], (self.ellipse[0][0], self.ellipse[0][1]), 0, 0, 360, color, -1)
+        # Fill map-image with white color
+        self.obstacle_map.fill(255)
+        # Draw various obstacles on the map
+        self.draw_circle()
+        self.draw_ellipse()
+        self.draw_polygons()
 
-        return img
+        return self.obstacle_map
