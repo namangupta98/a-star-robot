@@ -91,9 +91,9 @@ class Map:
         self.circle = [scaling_factor * 25, (scaling_factor * 225, scaling_factor * 50)]
         self.ellipse = [(scaling_factor * 40, scaling_factor * 20),
                         (scaling_factor * 150, scaling_factor * (height - 100))]
-        # Define empty world
-        self.obstacle_map = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        self.obstacle_map = self.draw_obstacles()
+        # Define empty world and add obstacles to it
+        self.obstacle_img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        self.obstacle_img = self.draw_obstacles()
         # Get image to search for obstacles
         self.check_img = self.erode_image()
 
@@ -111,7 +111,7 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 if (x - a) ** 2 + (y - b) ** 2 <= r ** 2:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
 
     def draw_ellipse(self):
         """
@@ -128,7 +128,7 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 if ((x - center_a) / a) ** 2 + ((y - center_b) / b) ** 2 <= 1:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
 
     def draw_polygons(self):
         """
@@ -148,15 +148,15 @@ class Map:
                 y_rhom = get_y_values(x, self.slopes_rhom, self.coord_rhombus, 4)
                 # Draw the convex polygon
                 if y_poly[0] <= y <= y_poly[6] and y_poly[1] <= y <= y_poly[5]:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
                 elif y_poly[2] <= y <= y_poly[4] and y_poly[6] <= y <= y_poly[3]:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
                 # Draw the tilted rectangle
                 elif y_rect[0] <= y <= y_rect[2] and y_rect[1] <= y <= y_rect[3]:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
                 # Draw the rhombus
                 elif y_rhom[0] <= y <= y_rhom[3] and y_rhom[1] <= y <= y_rhom[2]:
-                    self.obstacle_map[y][x] = (0, 0, 0)
+                    self.obstacle_img[y][x] = (0, 0, 0)
 
     def check_node_validity(self, x, y):
         """
@@ -180,7 +180,7 @@ class Map:
         :return: image with obstacle space expanded to distance threshold between robot and obstacle
         """
         # Get map with obstacles
-        eroded_img = self.obstacle_map.copy()
+        eroded_img = self.obstacle_img.copy()
         # Erode map image for rigid robot
         if self.thresh:
             kernel_size = (self.thresh * 2) + 1
@@ -195,10 +195,10 @@ class Map:
         :return: map-image with all obstacles
         """
         # Fill map-image with white color
-        self.obstacle_map.fill(255)
+        self.obstacle_img.fill(255)
         # Draw various obstacles on the map
         self.draw_circle()
         self.draw_ellipse()
         self.draw_polygons()
 
-        return self.obstacle_map
+        return self.obstacle_img
